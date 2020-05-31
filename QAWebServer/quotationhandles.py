@@ -525,7 +525,7 @@ class index_realtime(QABaseHandler):
         x = {
             "success": True,
             "data": {
-                "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
+                "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.vol], axis=1).to_numpy().tolist(),
                 "trades": [
                     {
                         "amount": float(quote['cur_vol'].values[0]),
