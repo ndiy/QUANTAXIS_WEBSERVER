@@ -264,9 +264,12 @@ class stock_realtime(QABaseHandler):
             x1 = res.data.reset_index()
             x1['datetime'] = pd.to_datetime(x1['datetime'])
 
-
-        quote = getattr(QA, 'QA_fetch_get_%s_realtime' % symble_type)('tdx', symbol)
+        try:
+            quote = getattr(QA, 'QA_fetch_get_%s_realtime' % symble_type)('tdx', symbol)
         #quote = QA.QA_fetch_get_stock_realtime('tdx', symbol)
+        except Exception as e:
+            print('%s null realtime' % sybmol)
+            quote = {}
 
         x = {
             "success": True,
