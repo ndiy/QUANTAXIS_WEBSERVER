@@ -492,15 +492,15 @@ class index_realtime(QABaseHandler):
             frequence = '5min'
         elif frequence == '60000':
             frequence = '1min'
-
+            
         try:
-            start = QA.QAUtil.QADate.QA_util_stamp2datetime(
-                self.get_argument('since', 1512205140000))
+            start = str(QA.QAUtil.QADate.QA_util_stamp2datetime(
+                self.get_argument('since', 1512205140000)))
         except:
             start = '2019-06-01'
-        end = QA.QAUtil.QADate.QA_util_stamp2datetime(
-            int(self.get_argument('prevTradeTime')))
-        print(symbol, start, end, frequence)
+        end = str(QA.QAUtil.QADate.QA_util_stamp2datetime(
+            int(self.get_argument('prevTradeTime'))))[0:19]
+
         res = QA.QA_quotation(symbol, start, end, frequence, 'index_cn',
                               source=QA.DATASOURCE.MONGO, output=QA.OUTPUT_FORMAT.DATASTRUCT)
         x1 = res.data.reset_index()
