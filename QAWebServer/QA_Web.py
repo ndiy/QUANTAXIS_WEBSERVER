@@ -50,7 +50,7 @@ from QAWebServer.quotationhandles import (MonitorSocketHandler,
                                           RealtimeSocketHandler,
                                           SimulateSocketHandler,
                                           future_realtime, stock_realtime, price_realtime,
-                                          bond_realtime)
+                                          bond_realtime, index_realtime)
 from QAWebServer.strategyhandlers import BacktestHandler, StrategyHandler
 from QAWebServer.tradehandles import AccModelHandler, TradeInfoHandler
 from QAWebServer.userhandles import (PersonBlockHandler, SigninHandler,
@@ -129,6 +129,8 @@ handlers = [
      stock_realtime),
     (r"/realtime/bond",
      bond_realtime),
+    (r"/realtime/index",
+     index_realtime),
     (r"/realtime/future",
      future_realtime),
     (r"/realtime/price",
