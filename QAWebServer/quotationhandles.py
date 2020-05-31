@@ -513,7 +513,7 @@ class index_realtime(QABaseHandler):
                 "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
                 "trades": [
                     {
-                        "amount": float(quote['xianliang'].values[0]),
+                        "amount": float(quote['cur_vol'].values[0]),
                         "price": float(quote['price'].values[0]),
                         "tid": 373015085,
                         "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
