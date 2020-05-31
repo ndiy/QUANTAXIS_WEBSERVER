@@ -391,7 +391,7 @@ class bond_realtime(QABaseHandler):
 
         try:
             quote = QA.QA_fetch_get_bond_realtime('tdx', symbol)
-        except Excetption as e:
+        except Exception as e:
             quote = None
         
         x = {
