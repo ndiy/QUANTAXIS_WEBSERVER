@@ -41,7 +41,8 @@ from QAWebServer.commandhandler import (CommandHandler, CommandHandlerWS,
 from QAWebServer.datahandles import (DataFetcher, StockBlockHandler, CurrentListHandler,
                                      StockCodeHandler, StockdayHandler,
                                      StockminHandler, StockPriceHandler,
-                                     FutureCodeHandler)
+                                     BondCodeHandler, BonddayHandler,
+                                     BondminHandler, FutureCodeHandler)
 from QAWebServer.filehandler import FileHandler
 from QAWebServer.jobhandler import FileRunHandler, JOBHandler
 from QAWebServer.select_codehandler import SelectCodehandler
@@ -86,6 +87,10 @@ handlers = [
      StockdayHandler),
     (r"/marketdata/stock/min",
      StockminHandler),
+    (r"/marketdata/bond/day",
+     BonddayHandler),
+    (r"/marketdata/bond/min",
+     BondminHandler),
     (r"/marketdata/fetcher",
      DataFetcher),
     (r"/marketdata/stock/block",
@@ -94,6 +99,8 @@ handlers = [
      StockPriceHandler),
     (r"/marketdata/stock/code",
      StockCodeHandler),
+    (r"/marketdata/bond/code",
+     BondCodeHandler),
     (r"/user/signin",
      SigninHandler),
     (r"/user/signup",

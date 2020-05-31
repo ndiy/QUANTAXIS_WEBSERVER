@@ -25,7 +25,8 @@
 
 from QAWebServer.basehandles import QABaseHandler, QAWebSocketHandler
 from QAWebServer.datahandles import (DataFetcher, StockdayHandler,FutureCodeHandler,
-                                     StockminHandler, CurrentListHandler)
+                                     StockminHandler, CurrentListHandler,
+                                     BondcodeHandler,BonddayHandler,BondminHandler)
 from QAWebServer.QA_Web import main
 from QAWebServer.quotationhandles import (RealtimeSocketHandler,
                                           SimulateSocketHandler)

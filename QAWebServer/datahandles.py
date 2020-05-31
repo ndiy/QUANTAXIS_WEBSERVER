@@ -38,10 +38,13 @@ from QAWebServer.fetch_block import get_block, get_name
 from QUANTAXIS.QAARP.market_preset import MARKET_PRESET
 from QUANTAXIS.QAFetch.Fetcher import QA_quotation
 from QUANTAXIS.QAFetch.QAQuery import (QA_fetch_stock_day, QA_fetch_stock_min,
+                                       QA_fetch_bond_day, QA_fetch_bond_min,
                                        QA_fetch_stock_to_market_date)
 from QUANTAXIS.QAFetch.QATdx import QA_fetch_get_future_list, QA_fetch_get_stock_list, QA_fetch_get_usstock_list, QA_fetch_get_index_list, QA_fetch_get_hkstock_list, QA_fetch_get_bond_list
 from QUANTAXIS.QAFetch.QAQuery_Advance import (QA_fetch_stock_day_adv,
-                                               QA_fetch_stock_min_adv)
+                                               QA_fetch_stock_min_adv,
+                                               QA_fetch_bond_day_adv,
+                                               QA_fetch_bond_min_adv)
 from QUANTAXIS.QAUtil.QADate_trade import (QA_util_get_last_day,
                                            QA_util_get_real_date)
 from QUANTAXIS.QAUtil.QADict import QA_util_dict_remove_key
@@ -162,6 +165,67 @@ class StockminHandler(QABaseHandler):
         self.write({'result': data})
 
 
+class BonddayHandler(QABaseHandler):
+    # @gen.coroutine
+    def get(self):
+        """
+        采用了get_arguents来获取参数
+        默认参数: code-->000001 start-->2017-01-01 end-->today
+
+        """
+        code = self.get_argument('code', default='000001')
+        start = self.get_argument('start', default='2017-01-01')
+        end = self.get_argument('end', default=str(datetime.date.today()))
+        if_fq = self.get_argument('if_fq', default=False)
+        return self.get_data(code, start, end, if_fq)
+
+    def get_data(self, code, start, end, if_fq):
+
+        if if_fq:
+            data = QA_util_to_json_from_pandas(
+                QA_fetch_bond_day_adv(code, start, end).to_qfq().data)
+
+            self.write({'result': data})
+        else:
+            data = QA_util_to_json_from_pandas(
+                QA_fetch_bond_day(code, start, end, format='pd'))
+
+            self.write({'result': data})
+
+
+class BondminHandler(QABaseHandler):
+    """stock_min
+
+    Arguments:
+        QABaseHandler {[type]} -- [description]
+    """
+
+    def get(self):
+        """
+        采用了get_arguents来获取参数
+        默认参数: code-->000001 start-->2017-01-01 09:00:00 end-->now
+
+        """
+        code = self.get_argument('code', default='000001')
+        start = self.get_argument('start', default='2017-01-01 09:00:00')
+        end = self.get_argument('end', default=str(datetime.datetime.now()))
+        frequence = self.get_argument('frequence', default='1min')
+        if_fq = self.get_argument('if_fq', default=False)
+
+        if if_fq:
+            data = QA_util_to_json_from_pandas(
+                QA_fetch_bond_min_adv(code, start, end, frequence).to_qfq().data)
+
+            self.write({'result': data})
+        else:
+            data = QA_util_to_json_from_pandas(
+                QA_fetch_bond_min(code, start, end, format='pd', frequence=frequence))
+
+            self.write({'result': data})
+
+        self.write({'result': data})
+
+
 class StockBlockHandler(QABaseHandler):
     """return BLOCK
 
@@ -207,6 +271,27 @@ class StockCodeHandler(QABaseHandler):
         try:
             code = self.get_argument('code', default='000001')[0:6]
             res = DATABASE.stock_list.find_one({'code': code})
+
+            if res is None:
+                self.write('wrong')
+
+            else:
+                self.write(res['name'].encode('gbk'))
+        except:
+            self.write('wrong')
+
+
+class BondCodeHandler(QABaseHandler):
+    """return BOND LIST/NAME
+
+    Arguments:
+        QABaseHandler {[type]} -- [description]
+    """
+
+    def get(self):
+        try:
+            code = self.get_argument('code', default='110031')[0:6]
+            res = DATABASE.bond_list.find_one({'code': code})
 
             if res is None:
                 self.write('wrong')
