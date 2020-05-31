@@ -506,7 +506,7 @@ class index_realtime(QABaseHandler):
         x1 = res.data.reset_index()
 
         quote = QA.QA_fetch_get_index_realtime('tdx', symbol)
-        x1['datetime'] = pd.to_datetime(x1['datetime'])
+        x1['datetime'] = pd.to_datetime(x1['date'])
         x = {
             "success": True,
             "data": {
