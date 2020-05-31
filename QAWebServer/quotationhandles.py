@@ -380,7 +380,7 @@ class bond_realtime(QABaseHandler):
 
                 x1['datetime'] = pd.to_datetime(x1['date'])
             else:
-                x1 = None
+                x1 = pd.DataFrame()
         else:
             res = QA.QA_fetch_bond_min_adv(symbol, start, end, frequence)
             if res:
