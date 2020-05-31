@@ -381,69 +381,86 @@ class bond_realtime(QABaseHandler):
             x1 = res.data.reset_index()
             x1['datetime'] = pd.to_datetime(x1['datetime'])
 
-        quote = QA.QA_fetch_get_bond_realtime('tdx', symbol)
+        try:
+            quote = QA.QA_fetch_get_bond_realtime('tdx', symbol)
 
-        x = {
-            "success": True,
-            "data": {
-                "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
-                "trades": [
-                    {
-                        "amount": float(quote['cur_vol'].values[0]),
-                        "price": float(quote['price'].values[0]),
-                        "tid": 373015085,
-                        "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
-                        "type": ["buy", "sell"][random.randint(0, 1)]
-                    }
-                ],
-                "depths": {
-                    "asks": [
-                            [
-                                float(quote['ask5'].values[0]),
-                                float(quote['ask_vol5'].values[0])
-                            ],
-                        [
-                                float(quote['ask4'].values[0]),
-                                float(quote['ask_vol4'].values[0])
-                                ],
-                        [
-                                float(quote['ask3'].values[0]),
-                                float(quote['ask_vol3'].values[0])
-                                ],
-                        [
-                                float(quote['ask2'].values[0]),
-                                float(quote['ask_vol2'].values[0])
-                                ],
-                        [
-                                float(quote['ask1'].values[0]),
-                                float(quote['ask_vol1'].values[0])
-                                ]
+            x = {
+                "success": True,
+                "data": {
+                    "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
+                    "trades": [
+                        {
+                            "amount": float(quote['cur_vol'].values[0]),
+                            "price": float(quote['price'].values[0]),
+                            "tid": 373015085,
+                            "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
+                            "type": ["buy", "sell"][random.randint(0, 1)]
+                        }
                     ],
-                    "bids": [
+                    "depths": {
+                        "asks": [
+                                [
+                                    float(quote['ask5'].values[0]),
+                                    float(quote['ask_vol5'].values[0])
+                                ],
                             [
-                                float(quote['bid1'].values[0]),
-                                float(quote['bid_vol1'].values[0])
-                            ],
-                        [
-                                float(quote['bid2'].values[0]),
-                                float(quote['bid_vol2'].values[0])
+                                    float(quote['ask4'].values[0]),
+                                    float(quote['ask_vol4'].values[0])
+                                    ],
+                            [
+                                    float(quote['ask3'].values[0]),
+                                    float(quote['ask_vol3'].values[0])
+                                    ],
+                            [
+                                    float(quote['ask2'].values[0]),
+                                    float(quote['ask_vol2'].values[0])
+                                    ],
+                            [
+                                    float(quote['ask1'].values[0]),
+                                    float(quote['ask_vol1'].values[0])
+                                    ]
+                        ],
+                        "bids": [
+                                [
+                                    float(quote['bid1'].values[0]),
+                                    float(quote['bid_vol1'].values[0])
                                 ],
-                        [
-                                float(quote['bid3'].values[0]),
-                                float(quote['bid_vol3'].values[0])
-                                ],
-                        [
-                                float(quote['bid4'].values[0]),
-                                float(quote['bid_vol4'].values[0])
-                                ],
-                        [
-                                float(quote['bid5'].values[0]),
-                                float(quote['bid_vol5'].values[0])
-                                ],
-                    ]
+                            [
+                                    float(quote['bid2'].values[0]),
+                                    float(quote['bid_vol2'].values[0])
+                                    ],
+                            [
+                                    float(quote['bid3'].values[0]),
+                                    float(quote['bid_vol3'].values[0])
+                                    ],
+                            [
+                                    float(quote['bid4'].values[0]),
+                                    float(quote['bid_vol4'].values[0])
+                                    ],
+                            [
+                                    float(quote['bid5'].values[0]),
+                                    float(quote['bid_vol5'].values[0])
+                                    ],
+                        ]
+                    }
                 }
             }
-        }
+        except Exception as e:
+            print(e)
+            x = x = {
+                "success": True,
+                "data": {
+                    "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
+                    "trades": [
+                    ],
+                    "depths": {
+                        "asks": [
+                        ],
+                        "bids": [
+                        ]
+                    }
+                }
+            }
 
         self.write(x)
         

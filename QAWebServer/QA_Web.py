@@ -48,7 +48,8 @@ from QAWebServer.select_codehandler import SelectCodehandler
 from QAWebServer.quotationhandles import (MonitorSocketHandler,
                                           RealtimeSocketHandler,
                                           SimulateSocketHandler,
-                                          future_realtime, stock_realtime, price_realtime)
+                                          future_realtime, stock_realtime, price_realtime,
+                                          bond_realtime)
 from QAWebServer.strategyhandlers import BacktestHandler, StrategyHandler
 from QAWebServer.tradehandles import AccModelHandler, TradeInfoHandler
 from QAWebServer.userhandles import (PersonBlockHandler, SigninHandler,
