@@ -247,11 +247,12 @@ class stock_realtime(QABaseHandler):
             int(self.get_argument('prevTradeTime'))))[0:19]
 
         #res = QA.QA_quotation(symbol, start, end, frequence, 'stock_cn','mongo', output=QA.OUTPUT_FORMAT.DATASTRUCT)
-        if frequence in ['day', 'week']:
+        if frequence in ['day', 'week', 'month']:
             res = QA.QA_fetch_stock_day_adv(symbol, start, end, frequence)
-            print(res.week)
             if frequence == 'week':
                 x1 = res.week.reset_index()
+            elif frequence == 'month':
+                x1 = res.month.reset_index()
             else:
                 x1 = res.data.reset_index()
             
@@ -367,11 +368,12 @@ class bond_realtime(QABaseHandler):
             int(self.get_argument('prevTradeTime'))))[0:19]
 
         #res = QA.QA_quotation(symbol, start, end, frequence, 'stock_cn','mongo', output=QA.OUTPUT_FORMAT.DATASTRUCT)
-        if frequence in ['day', 'week']:
+        if frequence in ['day', 'week', 'month']:
             res = QA.QA_fetch_bond_day_adv(symbol, start, end, frequence)
-            print(res.week)
             if frequence == 'week':
                 x1 = res.week.reset_index()
+            elif frequence == 'month':
+                x1 = res.month.reset_index()
             else:
                 x1 = res.data.reset_index()
             
@@ -501,12 +503,25 @@ class index_realtime(QABaseHandler):
         end = str(QA.QAUtil.QADate.QA_util_stamp2datetime(
             int(self.get_argument('prevTradeTime'))))[0:19]
 
-        res = QA.QA_quotation(symbol, start, end, frequence, 'index_cn',
+        if frequence in ['day', 'week', 'month']:
+            res = QA.QA_quotation(symbol, start, end, 'day', 'index_cn',
                               source=QA.DATASOURCE.MONGO, output=QA.OUTPUT_FORMAT.DATASTRUCT)
-        x1 = res.data.reset_index()
+            if frequence == 'week':
+                x1 = res.week.reset_index()
+            elif frequence == 'month':
+                x1 = res.month.reset_index()
+            else:
+                x1 = res.data.reset_index()
+            
+            x1['datetime'] = pd.to_datetime(x1['date'])
+        else:
+            res = QA.QA_quotation(symbol, start, end, frequence, 'index_cn',
+                              source=QA.DATASOURCE.MONGO, output=QA.OUTPUT_FORMAT.DATASTRUCT)
+            x1 = res.data.reset_index()
+            x1['datetime'] = pd.to_datetime(x1['datetime'])
 
         quote = QA.QA_fetch_get_index_realtime('tdx', symbol)
-        x1['datetime'] = pd.to_datetime(x1['date'])
+        
         x = {
             "success": True,
             "data": {
