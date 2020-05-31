@@ -247,10 +247,8 @@ class stock_realtime(QABaseHandler):
             int(self.get_argument('prevTradeTime'))))[0:19]
 
         #res = QA.QA_quotation(symbol, start, end, frequence, 'stock_cn','mongo', output=QA.OUTPUT_FORMAT.DATASTRUCT)
-        symble_type = 'stock' if symbol[0] == '6' or symbol[0:2] in ['00', '30', '02'] else 'bond'
         if frequence in ['day', 'week']:
-            res = getattr(QA, 'QA_fetch_%s_day_adv' % symble_type)(symbol, start, end, frequence)
-            #res = QA.QA_fetch_stock_day_adv(symbol, start, end, frequence)
+            res = QA.QA_fetch_stock_day_adv(symbol, start, end, frequence)
             print(res.week)
             if frequence == 'week':
                 x1 = res.week.reset_index()
@@ -259,96 +257,197 @@ class stock_realtime(QABaseHandler):
             
             x1['datetime'] = pd.to_datetime(x1['date'])
         else:
-            res = getattr(QA, 'QA_fetch_%s_min_adv' % symble_type)(symbol, start, end, frequence)
-            #res = QA.QA_fetch_stock_min_adv(symbol, start, end, frequence)
+            res = QA.QA_fetch_stock_min_adv(symbol, start, end, frequence)
             x1 = res.data.reset_index()
             x1['datetime'] = pd.to_datetime(x1['datetime'])
 
-        try:
-            quote = getattr(QA, 'QA_fetch_get_%s_realtime' % symble_type)('tdx', symbol)
-            #quote = QA.QA_fetch_get_stock_realtime('tdx', symbol)
-            x = {
-                "success": True,
-                "data": {
-                    "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
-                    "trades": [
-                        {
-                            "amount": float(quote['cur_vol'].values[0]),
-                            "price": float(quote['price'].values[0]),
-                            "tid": 373015085,
-                            "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
-                            "type": ["buy", "sell"][random.randint(0, 1)]
-                        }
-                    ],
-                    "depths": {
-                        "asks": [
-                                [
-                                    float(quote['ask5'].values[0]),
-                                    float(quote['ask_vol5'].values[0])
-                                ],
-                            [
-                                    float(quote['ask4'].values[0]),
-                                    float(quote['ask_vol4'].values[0])
-                                    ],
-                            [
-                                    float(quote['ask3'].values[0]),
-                                    float(quote['ask_vol3'].values[0])
-                                    ],
-                            [
-                                    float(quote['ask2'].values[0]),
-                                    float(quote['ask_vol2'].values[0])
-                                    ],
-                            [
-                                    float(quote['ask1'].values[0]),
-                                    float(quote['ask_vol1'].values[0])
-                                    ]
-                        ],
-                        "bids": [
-                                [
-                                    float(quote['bid1'].values[0]),
-                                    float(quote['bid_vol1'].values[0])
-                                ],
-                            [
-                                    float(quote['bid2'].values[0]),
-                                    float(quote['bid_vol2'].values[0])
-                                    ],
-                            [
-                                    float(quote['bid3'].values[0]),
-                                    float(quote['bid_vol3'].values[0])
-                                    ],
-                            [
-                                    float(quote['bid4'].values[0]),
-                                    float(quote['bid_vol4'].values[0])
-                                    ],
-                            [
-                                    float(quote['bid5'].values[0]),
-                                    float(quote['bid_vol5'].values[0])
-                                    ],
-                        ]
+        quote = QA.QA_fetch_get_stock_realtime('tdx', symbol)
+
+        x = {
+            "success": True,
+            "data": {
+                "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
+                "trades": [
+                    {
+                        "amount": float(quote['cur_vol'].values[0]),
+                        "price": float(quote['price'].values[0]),
+                        "tid": 373015085,
+                        "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
+                        "type": ["buy", "sell"][random.randint(0, 1)]
                     }
+                ],
+                "depths": {
+                    "asks": [
+                            [
+                                float(quote['ask5'].values[0]),
+                                float(quote['ask_vol5'].values[0])
+                            ],
+                        [
+                                float(quote['ask4'].values[0]),
+                                float(quote['ask_vol4'].values[0])
+                                ],
+                        [
+                                float(quote['ask3'].values[0]),
+                                float(quote['ask_vol3'].values[0])
+                                ],
+                        [
+                                float(quote['ask2'].values[0]),
+                                float(quote['ask_vol2'].values[0])
+                                ],
+                        [
+                                float(quote['ask1'].values[0]),
+                                float(quote['ask_vol1'].values[0])
+                                ]
+                    ],
+                    "bids": [
+                            [
+                                float(quote['bid1'].values[0]),
+                                float(quote['bid_vol1'].values[0])
+                            ],
+                        [
+                                float(quote['bid2'].values[0]),
+                                float(quote['bid_vol2'].values[0])
+                                ],
+                        [
+                                float(quote['bid3'].values[0]),
+                                float(quote['bid_vol3'].values[0])
+                                ],
+                        [
+                                float(quote['bid4'].values[0]),
+                                float(quote['bid_vol4'].values[0])
+                                ],
+                        [
+                                float(quote['bid5'].values[0]),
+                                float(quote['bid_vol5'].values[0])
+                                ],
+                    ]
                 }
             }
-        except Exception as e:
-            print('%s null realtime' % symbol)
-            quote = {}
-            x = {
-                "success": True,
-                "data": {
-                    "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
-                    "trades": [
-                    ],
-                    "depths": {
-                        "asks": [
-                        ],
-                        "bids": [
-                        ]
-                    }
-                }
-            }
-            
+        }
+
         self.write(x)
 
 
+class bond_realtime(QABaseHandler):
+    def get(self):
+        """
+        symbol=x&range=86400000&since=1512205140000&prevTradeTime=1512205194032
+
+        Arguments:
+            QABaseHandler {[type]} -- [description]
+
+        """
+
+        symbol = self.get_argument('symbol', '110031')
+        frequence = self.get_argument('range', '5min')
+
+        if frequence == '86400000':
+            frequence = 'day'
+        elif frequence == '604800000':
+            frequence = 'week'
+        elif frequence == '3600000':
+            frequence = '60min'
+        elif frequence == '1800000':
+            frequence = '30min'
+        elif frequence == '900000':
+            frequence = '15min'
+        elif frequence == '300000':
+            frequence = '5min'
+        elif frequence == '60000':
+            frequence = '1min'
+
+        # with open('mock.json', 'r') as r:
+        #     self.write(json.load(r))
+        try:
+            start = str(QA.QAUtil.QADate.QA_util_stamp2datetime(
+                self.get_argument('since', 1512205140000)))
+        except:
+            start = '2019-08-21'
+        end = str(QA.QAUtil.QADate.QA_util_stamp2datetime(
+            int(self.get_argument('prevTradeTime'))))[0:19]
+
+        #res = QA.QA_quotation(symbol, start, end, frequence, 'stock_cn','mongo', output=QA.OUTPUT_FORMAT.DATASTRUCT)
+        if frequence in ['day', 'week']:
+            res = QA.QA_fetch_bond_day_adv(symbol, start, end, frequence)
+            print(res.week)
+            if frequence == 'week':
+                x1 = res.week.reset_index()
+            else:
+                x1 = res.data.reset_index()
+            
+            x1['datetime'] = pd.to_datetime(x1['date'])
+        else:
+            res = QA.QA_fetch_bond_min_adv(symbol, start, end, frequence)
+            x1 = res.data.reset_index()
+            x1['datetime'] = pd.to_datetime(x1['datetime'])
+
+        quote = QA.QA_fetch_get_bond_realtime('tdx', symbol)
+
+        x = {
+            "success": True,
+            "data": {
+                "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
+                "trades": [
+                    {
+                        "amount": float(quote['cur_vol'].values[0]),
+                        "price": float(quote['price'].values[0]),
+                        "tid": 373015085,
+                        "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
+                        "type": ["buy", "sell"][random.randint(0, 1)]
+                    }
+                ],
+                "depths": {
+                    "asks": [
+                            [
+                                float(quote['ask5'].values[0]),
+                                float(quote['ask_vol5'].values[0])
+                            ],
+                        [
+                                float(quote['ask4'].values[0]),
+                                float(quote['ask_vol4'].values[0])
+                                ],
+                        [
+                                float(quote['ask3'].values[0]),
+                                float(quote['ask_vol3'].values[0])
+                                ],
+                        [
+                                float(quote['ask2'].values[0]),
+                                float(quote['ask_vol2'].values[0])
+                                ],
+                        [
+                                float(quote['ask1'].values[0]),
+                                float(quote['ask_vol1'].values[0])
+                                ]
+                    ],
+                    "bids": [
+                            [
+                                float(quote['bid1'].values[0]),
+                                float(quote['bid_vol1'].values[0])
+                            ],
+                        [
+                                float(quote['bid2'].values[0]),
+                                float(quote['bid_vol2'].values[0])
+                                ],
+                        [
+                                float(quote['bid3'].values[0]),
+                                float(quote['bid_vol3'].values[0])
+                                ],
+                        [
+                                float(quote['bid4'].values[0]),
+                                float(quote['bid_vol4'].values[0])
+                                ],
+                        [
+                                float(quote['bid5'].values[0]),
+                                float(quote['bid_vol5'].values[0])
+                                ],
+                    ]
+                }
+            }
+        }
+
+        self.write(x)
+        
+        
 class index_realtime(QABaseHandler):
     def get(self):
         """

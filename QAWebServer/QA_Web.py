@@ -119,6 +119,8 @@ handlers = [
      RealtimeSocketHandler),
     (r"/realtime/stock",
      stock_realtime),
+    (r"/realtime/bond",
+     bond_realtime),
     (r"/realtime/future",
      future_realtime),
     (r"/realtime/price",
