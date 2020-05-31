@@ -312,19 +312,19 @@ class FutureCodeHandler(QABaseHandler):
 
 class CurrentListHandler(QABaseHandler):
     def get(self):
-        bond_list = QA.QAFetch.QATdx.QA_fetch_get_bond_list()#.assign(market='bond_cn'),
-        ts_bond_list = QA.QA_fetch_bond_list_adv(DATABASE.bond_list_ts)
+        bond_list = QA_fetch_get_bond_list()#.assign(market='bond_cn'),
+        ts_bond_list = QA_fetch_bond_list_adv(DATABASE.bond_list_ts)
         cbond = list(ts_bond_list[ts_bond_list.list_date>'2002-01-01'].code)
         missing_cb_l = [cb for cb in cbond if cb[:6] not in list(bond_list.code)]
         missing_cb = ts_bond_list[ts_bond_list.code.isin(missing_cb_l)][['code','name','sse']].drop_duplicates()
         missing_cb.code = missing_cb.code.apply(lambda x: x[:6])
         currentlist = pd.concat([
-            QA.QAFetch.QATdx.QA_fetch_get_stock_list().assign(market='stock_cn'), 
-            QA.QAFetch.QATdx.QA_fetch_get_bond_list().assign(market='bond_cn'),
+            QA_fetch_get_stock_list().assign(market='stock_cn'), 
+            QA_fetch_get_bond_list().assign(market='bond_cn'),
             missing_cb.assign(market='bond_cn'),
-            QA.QAFetch.QATdx.QA_fetch_get_index_list().assign(market='index_cn'),
+            QA_fetch_get_index_list().assign(market='index_cn'),
             # QA_fetch_get_hkstock_list().assign(market='stock_hk'), 
-            QA.QAFetch.QATdx.QA_fetch_get_future_list().assign(market='future_cn')], sort=False)
+            QA_fetch_get_future_list().assign(market='future_cn')], sort=False)
         data = (currentlist.code + '/' + currentlist.name + '/' + currentlist.market).tolist()
         self.write({'result': data})
 
