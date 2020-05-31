@@ -370,36 +370,45 @@ class bond_realtime(QABaseHandler):
         #res = QA.QA_quotation(symbol, start, end, frequence, 'stock_cn','mongo', output=QA.OUTPUT_FORMAT.DATASTRUCT)
         if frequence in ['day', 'week', 'month']:
             res = QA.QA_fetch_bond_day_adv(symbol, start, end, frequence)
-            if frequence == 'week':
-                x1 = res.week.reset_index()
-            elif frequence == 'month':
-                x1 = res.month.reset_index()
+            if res:
+                if frequence == 'week':
+                    x1 = res.week.reset_index()
+                elif frequence == 'month':
+                    x1 = res.month.reset_index()
+                else:
+                    x1 = res.data.reset_index()
+
+                x1['datetime'] = pd.to_datetime(x1['date'])
             else:
-                x1 = res.data.reset_index()
-            
-            x1['datetime'] = pd.to_datetime(x1['date'])
+                x1 = None
         else:
             res = QA.QA_fetch_bond_min_adv(symbol, start, end, frequence)
-            x1 = res.data.reset_index()
-            x1['datetime'] = pd.to_datetime(x1['datetime'])
+            if res:
+                x1 = res.data.reset_index()
+                x1['datetime'] = pd.to_datetime(x1['datetime'])
+            else:
+                x1 = None
 
         try:
             quote = QA.QA_fetch_get_bond_realtime('tdx', symbol)
-
-            x = {
-                "success": True,
-                "data": {
-                    "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
-                    "trades": [
-                        {
+        except Excetption as e:
+            quote = None
+        
+        x = {
+            "success": True,
+            "data": {}
+        }
+        if x1:
+            x['data'].update({'lines': pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist()})
+        if quote:
+            x['data'].update({'trade': {
                             "amount": float(quote['cur_vol'].values[0]),
                             "price": float(quote['price'].values[0]),
                             "tid": 373015085,
                             "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
                             "type": ["buy", "sell"][random.randint(0, 1)]
-                        }
-                    ],
-                    "depths": {
+                        }})
+            x['data'].update({'depths':{
                         "asks": [
                                 [
                                     float(quote['ask5'].values[0]),
@@ -445,24 +454,8 @@ class bond_realtime(QABaseHandler):
                                     ],
                         ]
                     }
-                }
-            }
-        except Exception as e:
-            print(e)
-            x = x = {
-                "success": True,
-                "data": {
-                    "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
-                    "trades": [
-                    ],
-                    "depths": {
-                        "asks": [
-                        ],
-                        "bids": [
-                        ]
-                    }
-                }
-            }
+                             })
+            
 
         self.write(x)
         
