@@ -387,20 +387,20 @@ class bond_realtime(QABaseHandler):
                 x1 = res.data.reset_index()
                 x1['datetime'] = pd.to_datetime(x1['datetime'])
             else:
-                x1 = None
+                x1 = pd.DataFrame()
 
         try:
             quote = QA.QA_fetch_get_bond_realtime('tdx', symbol)
         except Exception as e:
-            quote = None
+            quote = pd.DataFrame()
         
         x = {
             "success": True,
             "data": {}
         }
-        if x1:
+        if not x1.empty:
             x['data'].update({'lines': pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist()})
-        if quote:
+        if not quote.empty:
             x['data'].update({'trade': {
                             "amount": float(quote['cur_vol'].values[0]),
                             "price": float(quote['price'].values[0]),
