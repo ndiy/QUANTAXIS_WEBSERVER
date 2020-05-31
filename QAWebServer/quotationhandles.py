@@ -249,82 +249,92 @@ class stock_realtime(QABaseHandler):
         #res = QA.QA_quotation(symbol, start, end, frequence, 'stock_cn','mongo', output=QA.OUTPUT_FORMAT.DATASTRUCT)
         if frequence in ['day', 'week', 'month']:
             res = QA.QA_fetch_stock_day_adv(symbol, start, end, frequence)
-            if frequence == 'week':
-                x1 = res.week.reset_index()
-            elif frequence == 'month':
-                x1 = res.month.reset_index()
+            if res:
+                if frequence == 'week':
+                    x1 = res.week.reset_index()
+                elif frequence == 'month':
+                    x1 = res.month.reset_index()
+                else:
+                    x1 = res.data.reset_index()
+
+                x1['datetime'] = pd.to_datetime(x1['date'])
             else:
-                x1 = res.data.reset_index()
-            
-            x1['datetime'] = pd.to_datetime(x1['date'])
+                x1 = pd.DataFrame()
         else:
             res = QA.QA_fetch_stock_min_adv(symbol, start, end, frequence)
-            x1 = res.data.reset_index()
-            x1['datetime'] = pd.to_datetime(x1['datetime'])
+            if res:
+                x1 = res.data.reset_index()
+                x1['datetime'] = pd.to_datetime(x1['datetime'])
+            else:
+                x1 = pd.DataFrame()
 
-        quote = QA.QA_fetch_get_stock_realtime('tdx', symbol)
+        try:
+            quote = QA.QA_fetch_get_stock_realtime('tdx', symbol)
+        except Exception as e:
+            quote = pd.DataFrame()
 
         x = {
             "success": True,
-            "data": {
-                "lines": pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist(),
-                "trades": [
-                    {
-                        "amount": float(quote['cur_vol'].values[0]),
-                        "price": float(quote['price'].values[0]),
-                        "tid": 373015085,
-                        "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
-                        "type": ["buy", "sell"][random.randint(0, 1)]
-                    }
-                ],
-                "depths": {
-                    "asks": [
-                            [
-                                float(quote['ask5'].values[0]),
-                                float(quote['ask_vol5'].values[0])
-                            ],
-                        [
-                                float(quote['ask4'].values[0]),
-                                float(quote['ask_vol4'].values[0])
-                                ],
-                        [
-                                float(quote['ask3'].values[0]),
-                                float(quote['ask_vol3'].values[0])
-                                ],
-                        [
-                                float(quote['ask2'].values[0]),
-                                float(quote['ask_vol2'].values[0])
-                                ],
-                        [
-                                float(quote['ask1'].values[0]),
-                                float(quote['ask_vol1'].values[0])
-                                ]
-                    ],
-                    "bids": [
-                            [
-                                float(quote['bid1'].values[0]),
-                                float(quote['bid_vol1'].values[0])
-                            ],
-                        [
-                                float(quote['bid2'].values[0]),
-                                float(quote['bid_vol2'].values[0])
-                                ],
-                        [
-                                float(quote['bid3'].values[0]),
-                                float(quote['bid_vol3'].values[0])
-                                ],
-                        [
-                                float(quote['bid4'].values[0]),
-                                float(quote['bid_vol4'].values[0])
-                                ],
-                        [
-                                float(quote['bid5'].values[0]),
-                                float(quote['bid_vol5'].values[0])
-                                ],
-                    ]
-                }
-            }
+            "data": {}
         }
+        if not x1.empty:
+            x['data'].update({'lines': pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist()})
+        if not quote.empty:
+            x['data'].update({'trade': {
+                            "amount": float(quote['cur_vol'].values[0]),
+                            "price": float(quote['price'].values[0]),
+                            "tid": 373015085,
+                            "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
+                            "type": ["buy", "sell"][random.randint(0, 1)]
+                        }})
+            x['data'].update({'depths':{
+                        "asks": [
+                                [
+                                    float(quote['ask5'].values[0]),
+                                    float(quote['ask_vol5'].values[0])
+                                ],
+                            [
+                                    float(quote['ask4'].values[0]),
+                                    float(quote['ask_vol4'].values[0])
+                                    ],
+                            [
+                                    float(quote['ask3'].values[0]),
+                                    float(quote['ask_vol3'].values[0])
+                                    ],
+                            [
+                                    float(quote['ask2'].values[0]),
+                                    float(quote['ask_vol2'].values[0])
+                                    ],
+                            [
+                                    float(quote['ask1'].values[0]),
+                                    float(quote['ask_vol1'].values[0])
+                                    ]
+                        ],
+                        "bids": [
+                                [
+                                    float(quote['bid1'].values[0]),
+                                    float(quote['bid_vol1'].values[0])
+                                ],
+                            [
+                                    float(quote['bid2'].values[0]),
+                                    float(quote['bid_vol2'].values[0])
+                                    ],
+                            [
+                                    float(quote['bid3'].values[0]),
+                                    float(quote['bid_vol3'].values[0])
+                                    ],
+                            [
+                                    float(quote['bid4'].values[0]),
+                                    float(quote['bid_vol4'].values[0])
+                                    ],
+                            [
+                                    float(quote['bid5'].values[0]),
+                                    float(quote['bid_vol5'].values[0])
+                                    ],
+                        ]
+                    }
+                             })
+            
 
         self.write(x)
 
