@@ -247,8 +247,10 @@ class stock_realtime(QABaseHandler):
             int(self.get_argument('prevTradeTime'))))[0:19]
 
         #res = QA.QA_quotation(symbol, start, end, frequence, 'stock_cn','mongo', output=QA.OUTPUT_FORMAT.DATASTRUCT)
+        symble_type = 'stock' if symbol[0] == '6' or symbol[0:2] in ['00', '30', '02'] else 'bond'
         if frequence in ['day', 'week']:
-            res = QA.QA_fetch_stock_day_adv(symbol, start, end, frequence)
+            res = getattr(QA, 'QA_fetch_%s_day_adv' % symble_type)(symbol, start, end, frequence)
+            #res = QA.QA_fetch_stock_day_adv(symbol, start, end, frequence)
             print(res.week)
             if frequence == 'week':
                 x1 = res.week.reset_index()
@@ -257,12 +259,14 @@ class stock_realtime(QABaseHandler):
             
             x1['datetime'] = pd.to_datetime(x1['date'])
         else:
-            res = QA.QA_fetch_stock_min_adv(symbol, start, end, frequence)
+            res = getattr(QA, 'QA_fetch_%s_min_adv' % symble_type)(symbol, start, end, frequence)
+            #res = QA.QA_fetch_stock_min_adv(symbol, start, end, frequence)
             x1 = res.data.reset_index()
             x1['datetime'] = pd.to_datetime(x1['datetime'])
 
 
-        quote = QA.QA_fetch_get_stock_realtime('tdx', symbol)
+        quote = getattr(QA, 'QA_fetch_get_%s_realtime' % symble_type)('tdx', symbol)
+        #quote = QA.QA_fetch_get_stock_realtime('tdx', symbol)
 
         x = {
             "success": True,
