@@ -280,13 +280,13 @@ class stock_realtime(QABaseHandler):
         if not x1.empty:
             x['data'].update({'lines': pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist()})
         if not quote.empty:
-            x['data'].update({'trade': {
+            x['data'].update({'trade': [{
                             "amount": float(quote['cur_vol'].values[0]),
                             "price": float(quote['price'].values[0]),
                             "tid": 373015085,
                             "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
                             "type": ["buy", "sell"][random.randint(0, 1)]
-                        }})
+                        }]})
             x['data'].update({'depths':{
                         "asks": [
                                 [
@@ -411,13 +411,13 @@ class bond_realtime(QABaseHandler):
         if not x1.empty:
             x['data'].update({'lines': pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist()})
         if not quote.empty:
-            x['data'].update({'trade': {
+            x['data'].update({'trade': [{
                             "amount": float(quote['cur_vol'].values[0]),
                             "price": float(quote['price'].values[0]),
                             "tid": 373015085,
                             "time": float(quote.index.levels[0][0].tz_localize('Asia/Shanghai').value/1000000),
                             "type": ["buy", "sell"][random.randint(0, 1)]
-                        }})
+                        }]})
             x['data'].update({'depths':{
                         "asks": [
                                 [
