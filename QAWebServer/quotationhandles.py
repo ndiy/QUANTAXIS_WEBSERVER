@@ -280,7 +280,7 @@ class stock_realtime(QABaseHandler):
         if not x1.empty:
             x['data'].update({'lines': pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist()})
         if not quote.empty:
-            x['data'].update({'trade': [{
+            x['data'].update({'trades': [{
                             "amount": float(quote['cur_vol'].values[0]),
                             "price": float(quote['price'].values[0]),
                             "tid": 373015085,
@@ -411,7 +411,7 @@ class bond_realtime(QABaseHandler):
         if not x1.empty:
             x['data'].update({'lines': pd.concat([x1.datetime.apply(lambda x: float(x.tz_localize('Asia/Shanghai').value/1000000)), x1.open, x1.high, x1.low, x1.close, x1.volume], axis=1).to_numpy().tolist()})
         if not quote.empty:
-            x['data'].update({'trade': [{
+            x['data'].update({'trades': [{
                             "amount": float(quote['cur_vol'].values[0]),
                             "price": float(quote['price'].values[0]),
                             "tid": 373015085,
